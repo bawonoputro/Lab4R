@@ -1,4 +1,12 @@
-
+#' Linear Regression Using Reference Class
+#'
+#' A function in form of class for fitting a linear regression model using
+#' QR decomposition. Also supports basic regression methods like fitting the
+#' model, printing the results, plotting diagnostics, and returning residuals,
+#' predicted values, and coefficients.
+#'
+#' @name linreg
+#' @export
 linreg <- setRefClass( "linreg",
                        fields = list(
                          formula = "formula",
@@ -13,6 +21,16 @@ linreg <- setRefClass( "linreg",
                          regression_variance = "matrix"
                        ),
                        methods = list(
+                         #' @title Initialize the linreg Object
+                         #'
+                         #' @description Initializes an object by performing QR decomposition
+                         #' and calculating the regression coefficients, fitted values, residuals,
+                         #' and residual variance.
+                         #'
+                         #' @param formula A formula specifying the linear regression model (e.g., y ~ x).
+                         #' @param data A data frame containing the data for fitting the model.
+                         #' @return An object with the calculated coefficients, residuals, fitted values,
+                         #' and other related statistics.
                          initialize = function(formula, data){
                            .self$formula <- formula
                            .self$data <- data
@@ -44,6 +62,9 @@ linreg <- setRefClass( "linreg",
                            #regression coefficients var(Beta)
                            .self$regression_variance <-  .self$residual_variance * t(solve(.self$R)) %*% solve(.self$R)
                          },
+                         #' @title Print the Coefficient and Formula
+                         #'
+                         #' @description Prints the formula used in the model and the regression coefficients.
                          print = function(){
                            cat("Call:\n")
                            print(.self$formula)
@@ -52,6 +73,11 @@ linreg <- setRefClass( "linreg",
                            print(.self$beta)
 
                          },
+                         #' @title Plot Graphic
+                         #'
+                         #' @description Shows two plots: Residuals vs. Fitted values plot
+                         #' and Scale-Location plot.
+
                          plot = function(){
                            #residuals vs fitted
                            plot_rvf <- ggplot(data = data.frame(fitted = .self$fitted, residuals = .self$residuals), aes(x = fitted, y = residuals)) +
@@ -70,15 +96,38 @@ linreg <- setRefClass( "linreg",
                            print(plot_rvf)
                            print(plot_sl)
                          },
+
+                         #' @title Get Residuals
+                         #'
+                         #' @description Returns the residuals (errors) of the regression model.
+                         #'
+                         #' @return A numeric vector of residuals (ˆe).
                          resid = function(){
                            return(.self$residuals)
                          },
+
+                         #' @title Get Predicted Values
+                         #'
+                         #' @description Returns the predicted values (fitted values) of the model.
+                         #'
+                         #' @return A numeric vector of fitted values.
                          pred = function(){
                            return(.self$fitted)
                          },
+
+                         #' @title Get Coefficients
+                         #'
+                         #' @description Returns the regression coefficients (beta) of the model.
+                         #'
+                         #' @return A numeric vector of regression coefficients.
                          coef = function(){
                            return(.self$beta)
                          },
+
+                         #' @title Get Model Summary
+                         #'
+                         #' @description Summarizes the regression model by providing the coefficients,
+                         #' standard errors, t-values, p-values, residual standard error, and degrees of freedom.
                          summary = function(){
                            .self$standard_error <- sqrt(diag(.self$regression_variance))
                            .self$t_value <- .self$beta / sqrt(diag(.self$regression_variance))

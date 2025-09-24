@@ -1,19 +1,24 @@
 Package: Lab4R
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Linear Regression Using Reference Class and QR decomposition
 Version: 0.1.0
 Authors@R: c(
     person(
-      "Jane", "Doe",
-      email = "jane@example.com",
+      "Paripurna", "Bawonoputro",
+      email = "parba751@student.liu.se",
       role = c("aut", "cre")
-    )
+    ),
+    person(
+      "Sreyas", "A S",
+      email = "sread272@student.liu.se",
+      role = c("aut")
+      )
   )
-Description: More about what it does (maybe more than one line).
-    Continuation lines should be indented.
-License: What license is it under?
+Description: A function in form of class for fitting a linear regression model
+    using QR decomposition.
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-
-Import:
-ggplot2
+Imports:
+    ggplot2
+RoxygenNote: 7.3.3
