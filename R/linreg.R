@@ -11,6 +11,7 @@ linreg <- setRefClass( "linreg",
                        fields = list(
                          formula = "formula",
                          data = "data.frame",
+                         data_name = "character",
                          X = "matrix",
                          y = "numeric",
                          beta = "numeric",
@@ -18,7 +19,13 @@ linreg <- setRefClass( "linreg",
                          residuals = "numeric",
                          dof = "numeric",
                          residual_variance = "numeric",
-                         regression_variance = "matrix"
+                         regression_variance = "matrix",
+                         Q = "matrix",
+                         R = "matrix",
+                         standard_error = "numeric",
+                         t_value = "numeric",
+                         p_value = "numeric",
+                         estimated_residual_se = "numeric"
                        ),
                        methods = list(
                          #' @title Initialize the linreg Object
@@ -34,6 +41,7 @@ linreg <- setRefClass( "linreg",
                          initialize = function(formula, data){
                            .self$formula <- formula
                            .self$data <- data
+                           .self$data_name <- deparse(substitute(data))
                            .self$X <- model.matrix(formula,data)
                            .self$y <- data[[all.vars(formula)[1]]]
 
@@ -46,7 +54,7 @@ linreg <- setRefClass( "linreg",
                            .self$beta <- as.numeric(solve(.self$R, crossprod(.self$Q, .self$y)))
 
                            #fitted value
-                           .self$fitted = .self$X %*% .self$beta
+                           .self$fitted = as.numeric(.self$X %*% .self$beta)
 
                            #residuals
                            .self$residuals = .self$y - .self$fitted
@@ -65,13 +73,14 @@ linreg <- setRefClass( "linreg",
                          #' @title Print the Coefficient and Formula
                          #'
                          #' @description Prints the formula used in the model and the regression coefficients.
-                         print = function(){
-                           cat("Call:\n")
-                           print(.self$formula)
+                         print = function() {
+                           cat("linreg(formula = ", deparse(.self$formula),
+                               ", data = ", .self$data_name, ")\n", sep = "")
 
                            cat("\nCoefficients:\n")
-                           print(.self$beta)
-
+                           named_coefficients <- .self$beta
+                           names(named_coefficients) <- colnames(.self$X)
+                           base::print(named_coefficients)
                          },
                          #' @title Plot Graphic
                          #'
@@ -128,24 +137,20 @@ linreg <- setRefClass( "linreg",
                          #'
                          #' @description Summarizes the regression model by providing the coefficients,
                          #' standard errors, t-values, p-values, residual standard error, and degrees of freedom.
-                         summary = function(){
-                           .self$standard_error <- sqrt(diag(.self$regression_variance))
-                           .self$t_value <- .self$beta / sqrt(diag(.self$regression_variance))
-                           .self$p_value <- 2 * (1 - pt(abs(.self$beta / sqrt(diag(.self$regression_variance))), df = .self$dof))
-
-                           summary_table <- data.frame(
-                             Standard_Error = .self$standard_error,
-                             t.value = .self$t_value,
-                             p_value = .self$p_value,
-                           )
-
+                         summary = function() {
                            cat("\nCoefficients:\n")
-                           print(summary_table)  # Print the coefficients table with Std.Error, t.value, p.value
+                           named_coefficients <- .self$beta
+                           names(named_coefficients) <- colnames(.self$X)
 
+                           named_coefficients <- round(named_coefficients, 2)
+
+                           base::print(named_coefficients)
                            .self$estimated_residual_se <- sqrt(.self$residual_variance)
-                           cat("\nEstimated Residual Standard Error:", .self$estimated_residual_se, "\n")
+
+                           cat("\nEstimated Residual Standard Error:", round(.self$estimated_residual_se, 2), "\n")
                            cat("Degrees of Freedom:", .self$dof, "\n")
                          }
+
 
 
                        )
